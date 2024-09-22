@@ -1,0 +1,67 @@
+package com.kientran.product_service.controller;
+
+import com.kientran.product_service.dto.ProductDto;
+import com.kientran.product_service.response.ApiResponse;
+import com.kientran.product_service.service.ProductService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@CrossOrigin(origins = "http://localhost:5173")
+@RestController
+@RequestMapping("/api/product")
+public class ProductController {
+
+    @Autowired
+    private ProductService productService;
+
+    @PostMapping("/add/{categoryId}")
+    public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto productDto,
+                                                    @PathVariable Integer categoryId) {
+        ProductDto createProduct = this.productService.createProduct(productDto, categoryId);
+        return new ResponseEntity<ProductDto>(createProduct, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<ApiResponse> deleteProduct(@PathVariable Integer productId) {
+        this.productService.deleteProduct(productId);
+        return new ResponseEntity<ApiResponse>(new ApiResponse("Product is deleted successfully!", true),
+                HttpStatus.OK);
+    }
+
+    @GetMapping("/{productId}")
+    public ResponseEntity<ProductDto> getProduct(@PathVariable Integer productId) {
+        ProductDto productDto = this.productService.getProductById(productId);
+        return new ResponseEntity<ProductDto>(productDto, HttpStatus.OK);
+    }
+
+    @PutMapping("/{productId}")
+    public ResponseEntity<ProductDto> updateProduct(@RequestBody ProductDto productDto,
+                                                    @PathVariable Integer productId) {
+        ProductDto updatedProduct = this.productService.updateProduct(productDto, productId);
+        return new ResponseEntity<ProductDto>(updatedProduct, HttpStatus.OK);
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<List<ProductDto>> getAllProducts() {
+        List<ProductDto> productDtos = this.productService.getAllProducts();
+        return new ResponseEntity<List<ProductDto>>(productDtos, HttpStatus.OK);
+    }
+
+    @PutMapping("/{productId}/{discountId}")
+    public ResponseEntity<ProductDto> updateProduct(@PathVariable Integer productId,
+                                                    @PathVariable Integer discountId) {
+        ProductDto updatedProduct = this.productService.applyDiscount(productId, discountId);
+        return new ResponseEntity<ProductDto>(updatedProduct, HttpStatus.OK);
+    }
+
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<List<ProductDto>> getProductsByCategory(@PathVariable Integer categoryId) {
+        List<ProductDto> productDtos = this.productService.getProductsByCategory(categoryId);
+        return new ResponseEntity<List<ProductDto>>(productDtos, HttpStatus.OK);
+    }
+
+}
