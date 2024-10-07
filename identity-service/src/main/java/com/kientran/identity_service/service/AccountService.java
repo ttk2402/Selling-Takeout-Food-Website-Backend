@@ -24,6 +24,8 @@ public interface AccountService {
 
     List<AccountDto> getAccountsByRole(Integer roleId);
 
-    List<AccountDto> getAccounts();
+    List<ResAccountDto> getAccounts();
+
+    TotalCustomerDto getTotalCustomerInStore();
 
 }

@@ -32,5 +32,4 @@ public class ItemOrderedServiceImpl implements ItemOrderedService {
         ItemOrdered newItemOrdered = this.itemOrderedRepository.save(itemOrdered);
         return this.modelMapper.map(newItemOrdered, ItemOrderedDto.class);
     }
-
 }

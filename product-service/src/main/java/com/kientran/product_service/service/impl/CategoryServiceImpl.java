@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import com.kientran.product_service.dto.CategoryDto;
 import com.kientran.product_service.dto.ResCategoryDto;
+import com.kientran.product_service.dto.TotalCategoryDto;
 import com.kientran.product_service.entity.Category;
 import com.kientran.product_service.exception.ResourceNotFoundException;
 import com.kientran.product_service.repository.CategoryRepository;
@@ -57,6 +58,13 @@ public class CategoryServiceImpl implements CategoryService {
     public ResCategoryDto getCategory(Integer categoryId) {
         Category cat = this.categoryRepository.findById(categoryId).orElseThrow(()-> new ResourceNotFoundException("Category","CategoryId", categoryId));;
         return this.modelMapper.map(cat, ResCategoryDto.class);
+    }
+
+    @Override
+    public TotalCategoryDto getTotalCategoryInStore() {
+        TotalCategoryDto categoryDto = new TotalCategoryDto();
+        categoryDto.setTotal(this.categoryRepository.getTotalCategory());
+        return categoryDto;
     }
 
 }

@@ -2,6 +2,7 @@ package com.kientran.order_service.controller;
 
 import com.kientran.order_service.dto.OrderDto;
 import com.kientran.order_service.dto.ResOrderDto;
+import com.kientran.order_service.dto.TotalOrderDto;
 import com.kientran.order_service.response.ApiResponse;
 import com.kientran.order_service.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import java.util.List;
 
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api/order")
 public class OrderController {
 
@@ -65,6 +67,18 @@ public class OrderController {
     public ResponseEntity<List<ResOrderDto>> getAllOrder() {
         List<ResOrderDto> orderDtos = this.orderService.getAllOrder();
         return new ResponseEntity<List<ResOrderDto>>(orderDtos, HttpStatus.OK);
+    }
+
+    @GetMapping("/account/{accountId}")
+    public ResponseEntity<List<ResOrderDto>> getAllOrderByAccountID(@PathVariable Integer accountId) {
+        List<ResOrderDto> orderDtos = this.orderService.getAllOrderOfAccountID(accountId);
+        return new ResponseEntity<List<ResOrderDto>>(orderDtos, HttpStatus.OK);
+    }
+
+    @GetMapping("/totalOrder")
+    public ResponseEntity<TotalOrderDto> getTotalOrder() {
+        TotalOrderDto orderDto = this.orderService.getTotalOrderInStore();
+        return new ResponseEntity<TotalOrderDto>(orderDto, HttpStatus.OK);
     }
 
 }

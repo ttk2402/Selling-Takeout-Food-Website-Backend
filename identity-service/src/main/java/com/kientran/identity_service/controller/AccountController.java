@@ -86,9 +86,15 @@ public class AccountController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<List<AccountDto>> getAllAccounts() {
-        List<AccountDto> accounts = this.accountService.getAccounts();
+    public ResponseEntity<List<ResAccountDto>> getAllAccounts() {
+        List<ResAccountDto> accounts = this.accountService.getAccounts();
         return ResponseEntity.ok(accounts);
+    }
+
+    @GetMapping("/totalCustomer")
+    public ResponseEntity<TotalCustomerDto> getTotalCustomer() {
+        TotalCustomerDto customerDto = this.accountService.getTotalCustomerInStore();
+        return new ResponseEntity<TotalCustomerDto>(customerDto, HttpStatus.OK);
     }
 
 }

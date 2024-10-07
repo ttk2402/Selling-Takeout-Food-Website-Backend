@@ -18,5 +18,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     @Query(value = "select * from account where account.username = :username or  account.email = :email", nativeQuery = true)
     List<Account> isValidOfUsernameAndEmail(@Param("username") String username, @Param("email") String email);
 
+    @Query(value = "select count(*) from account a, role b where b.id=a.role_id and b.role='CUSTOMER';", nativeQuery = true)
+    Integer getTotalCustomer();
 
 }

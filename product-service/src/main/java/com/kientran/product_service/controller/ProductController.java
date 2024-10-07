@@ -1,6 +1,7 @@
 package com.kientran.product_service.controller;
 
 import com.kientran.product_service.dto.ProductDto;
+import com.kientran.product_service.dto.TotalProductDto;
 import com.kientran.product_service.response.ApiResponse;
 import com.kientran.product_service.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,16 +52,34 @@ public class ProductController {
         return new ResponseEntity<List<ProductDto>>(productDtos, HttpStatus.OK);
     }
 
-    @PutMapping("/{productId}/{discountId}")
-    public ResponseEntity<ProductDto> updateProduct(@PathVariable Integer productId,
+    @PutMapping("/applyDiscount/{productId}/{discountId}")
+    public ResponseEntity<ProductDto> applyProduct(@PathVariable Integer productId,
                                                     @PathVariable Integer discountId) {
         ProductDto updatedProduct = this.productService.applyDiscount(productId, discountId);
+        return new ResponseEntity<ProductDto>(updatedProduct, HttpStatus.OK);
+    }
+
+    @PutMapping("/removeDiscount/{productId}")
+    public ResponseEntity<ProductDto> unApplyProduct(@PathVariable Integer productId) {
+        ProductDto updatedProduct = this.productService.removeDiscount(productId);
         return new ResponseEntity<ProductDto>(updatedProduct, HttpStatus.OK);
     }
 
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<List<ProductDto>> getProductsByCategory(@PathVariable Integer categoryId) {
         List<ProductDto> productDtos = this.productService.getProductsByCategory(categoryId);
+        return new ResponseEntity<List<ProductDto>>(productDtos, HttpStatus.OK);
+    }
+
+    @GetMapping("/totalProduct")
+    public ResponseEntity<TotalProductDto> getTotalProduct() {
+        TotalProductDto productDto = this.productService.getTotalProductInStore();
+        return new ResponseEntity<TotalProductDto>(productDto, HttpStatus.OK);
+    }
+
+    @GetMapping("/discounted")
+    public ResponseEntity<List<ProductDto>> getProductsDiscounted() {
+        List<ProductDto> productDtos = this.productService.getProductsHaveDiscount();
         return new ResponseEntity<List<ProductDto>>(productDtos, HttpStatus.OK);
     }
 

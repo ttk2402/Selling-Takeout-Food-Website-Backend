@@ -2,6 +2,8 @@ package com.kientran.product_service.service;
 
 import com.kientran.product_service.dto.CategoryDto;
 import com.kientran.product_service.dto.ResCategoryDto;
+import com.kientran.product_service.dto.TotalCategoryDto;
+import com.kientran.product_service.dto.TotalProductDto;
 import com.kientran.product_service.response.CategoryResponse;
 
 import java.util.List;
@@ -18,4 +20,5 @@ public interface CategoryService {
 
     ResCategoryDto getCategory(Integer categoryId);
 
+    TotalCategoryDto getTotalCategoryInStore();
 }

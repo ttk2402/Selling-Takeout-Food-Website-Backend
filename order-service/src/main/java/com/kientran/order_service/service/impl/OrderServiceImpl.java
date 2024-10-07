@@ -2,10 +2,7 @@ package com.kientran.order_service.service.impl;
 
 import com.kientran.order_service.client.CartServiceClient;
 import com.kientran.order_service.client.ResItemDto;
-import com.kientran.order_service.dto.BillDto;
-import com.kientran.order_service.dto.ItemOrderedDto;
-import com.kientran.order_service.dto.OrderDto;
-import com.kientran.order_service.dto.ResOrderDto;
+import com.kientran.order_service.dto.*;
 import com.kientran.order_service.entity.*;
 import com.kientran.order_service.exception.ResourceNotFoundException;
 import com.kientran.order_service.repository.*;
@@ -37,6 +34,9 @@ public class OrderServiceImpl implements OrderService {
     private OrderRepository orderRepository;
 
     @Autowired
+    private BillRepository billRepository;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @Autowired
@@ -51,7 +51,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public ResOrderDto createOrderByStaff(OrderDto orderDto, Integer checkoutId) {
         Checkout checkout = this.checkOutRepository.findById(checkoutId).orElseThrow(()-> new ResourceNotFoundException("CheckOut","CheckOutId", checkoutId));
-        OrderStatus orStatus = this.orderStatusRepository.findOrderStatusByStatus("Shipping");
+        OrderStatus orStatus = this.orderStatusRepository.findOrderStatusByStatus("Đã nhận hàng");
         Order order = this.modelMapper.map(orderDto, Order.class);
 
         LocalDateTime now = LocalDateTime.now();
@@ -68,7 +68,7 @@ public class OrderServiceImpl implements OrderService {
         for (ResItemDto itemDto : items) {
             ItemOrderedDto ordered = modelMapper.map(itemDto, ItemOrderedDto.class);
             this.itemOrderedService.createItem(ordered, addOrder.getId());
-            total_price += itemDto.getPrice()*itemDto.getQuantity();
+            total_price += itemDto.getPrice();
             this.cartServiceClient.deleteItem(itemDto.getId());
         }
         Integer orderId = addOrder.getId();
@@ -90,7 +90,7 @@ public class OrderServiceImpl implements OrderService {
     public ResOrderDto createOrderByCustomer(OrderDto orderDto, Integer checkoutId, Integer deliveryInfoId) {
         Checkout checkout = this.checkOutRepository.findById(checkoutId).orElseThrow(()-> new ResourceNotFoundException("CheckOut","CheckOutId", checkoutId));
         DeliveryInformation deliveryInfo = this.deliveryInfoRepository.findById(deliveryInfoId).orElseThrow(()-> new ResourceNotFoundException("DeliveryInfo","DeliveryInfoId", deliveryInfoId));
-        OrderStatus orStatus = this.orderStatusRepository.findOrderStatusByStatus("Shipping");
+        OrderStatus orStatus = this.orderStatusRepository.findOrderStatusByStatus("Chờ xác nhận");
         Order order = this.modelMapper.map(orderDto, Order.class);
 
         LocalDateTime now = LocalDateTime.now();
@@ -108,7 +108,7 @@ public class OrderServiceImpl implements OrderService {
         for (ResItemDto itemDto : items) {
             ItemOrderedDto ordered = modelMapper.map(itemDto, ItemOrderedDto.class);
             this.itemOrderedService.createItem(ordered, addOrder.getId());
-            total_price += itemDto.getPrice()*itemDto.getQuantity();
+            total_price += itemDto.getPrice();
             this.cartServiceClient.deleteItem(itemDto.getId());
         }
         Integer orderId = addOrder.getId();
@@ -135,7 +135,9 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void deleteOrder(Integer orderId) {
         Order order = this.orderRepository.findById(orderId).orElseThrow(()-> new ResourceNotFoundException("Order","OrderId", orderId));
+        Bill bill = this.billRepository.findByOrder(order);
         this.orderRepository.delete(order);
+        this.billRepository.delete(bill);
     }
 
     @Override
@@ -161,6 +163,28 @@ public class OrderServiceImpl implements OrderService {
         List<ResOrderDto> orderDtos = orders.stream().map((order) -> this.modelMapper.map(order, ResOrderDto.class))
                 .collect(Collectors.toList());
         return orderDtos;
+    }
+
+    @Override
+    public List<ResOrderDto> getAllOrderOfAccountID(Integer accountId) {
+        List<Order> orders = this.orderRepository.findByAccountId(accountId);
+        List<ResOrderDto> orderDtos = orders.stream().map((order) -> this.modelMapper.map(order, ResOrderDto.class))
+                .collect(Collectors.toList());
+        return orderDtos;
+    }
+
+    @Override
+    public RevenueDto getRevenueOfStore() {
+        RevenueDto revenueDto = new RevenueDto();
+        revenueDto.setRevenue(this.orderRepository.calculateRevenue());
+        return revenueDto;
+    }
+
+    @Override
+    public TotalOrderDto getTotalOrderInStore() {
+        TotalOrderDto orderDto = new TotalOrderDto();
+        orderDto.setTotal(this.orderRepository.getTotalOrder());
+        return orderDto;
     }
 
 }

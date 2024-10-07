@@ -14,4 +14,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Query(value = "select id from product", nativeQuery = true)
     List<Integer> getAllIdOfProduct();
 
+    @Query(value = "select count(*) from product;", nativeQuery = true)
+    Integer getTotalProduct();
+
 }

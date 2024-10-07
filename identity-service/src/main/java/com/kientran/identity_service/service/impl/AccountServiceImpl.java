@@ -64,7 +64,7 @@ public class AccountServiceImpl implements AccountService {
     public void deleteAccount(Integer accountId) {
         Account account = this.accountRepository.findById(accountId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account", "AccountId", accountId));
-        if(account.getRole().getRole().equals("CUSTOMER")) {
+        if(account.getRole().getRole().equals("STAFF") || account.getRole().getRole().equals("CUSTOMER")) {
             //Call to create new cart for account by accountID
             cartServiceClient.deleteCartByAccountID(account.getId());
         }
@@ -103,12 +103,11 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public ResAccountDto login(LoginDto loginDto) {
         Account account = this.accountRepository.findAccountByLoginDto(loginDto.getUsername(), loginDto.getPassword());
-        if(account == null) {
+        if(account == null || account.getAccount_status().getStatus().equals("BLOCKED")) {
             return new ResAccountDto();
         }else {
             return this.modelMapper.map(account, ResAccountDto.class);
         }
-
     }
 
     @Override
@@ -119,6 +118,7 @@ public class AccountServiceImpl implements AccountService {
         account.setLastname(updateAccountDto.getLastname());
         account.setUsername(updateAccountDto.getUsername());
         account.setEmail(updateAccountDto.getEmail());
+        account.setPassword(updateAccountDto.getPassword());
         Account updatedAccount = this.accountRepository.save(account);
         return this.modelMapper.map(updatedAccount, ResAccountDto.class);
     }
@@ -147,9 +147,16 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<AccountDto> getAccounts() {
+    public List<ResAccountDto> getAccounts() {
         List<Account> accounts = this.accountRepository.findAll();
-        return accounts.stream().map((account)-> this.modelMapper.map(account, AccountDto.class)).collect(Collectors.toList());
+        return accounts.stream().map((account)-> this.modelMapper.map(account, ResAccountDto.class)).collect(Collectors.toList());
+    }
+
+    @Override
+    public TotalCustomerDto getTotalCustomerInStore() {
+        TotalCustomerDto customerDto = new TotalCustomerDto();
+        customerDto.setTotal(this.accountRepository.getTotalCustomer());
+        return customerDto;
     }
 
 }

@@ -2,6 +2,7 @@ package com.kientran.product_service.controller;
 
 import com.kientran.product_service.dto.CategoryDto;
 import com.kientran.product_service.dto.ResCategoryDto;
+import com.kientran.product_service.dto.TotalCategoryDto;
 import com.kientran.product_service.response.ApiResponse;
 import com.kientran.product_service.response.CategoryResponse;
 import com.kientran.product_service.service.CategoryService;
@@ -50,6 +51,12 @@ public class CategoryController {
     public ResponseEntity<List<CategoryDto>> getAllCategories() {
         List<CategoryDto> categories = this.categoryService.getCategories();
         return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("/totalCategory")
+    public ResponseEntity<TotalCategoryDto> getTotalCategory() {
+        TotalCategoryDto categoryDto = this.categoryService.getTotalCategoryInStore();
+        return new ResponseEntity<TotalCategoryDto>(categoryDto, HttpStatus.OK);
     }
 
 }

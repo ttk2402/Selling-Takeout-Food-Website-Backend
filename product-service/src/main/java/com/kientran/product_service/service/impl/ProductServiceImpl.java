@@ -1,6 +1,7 @@
 package com.kientran.product_service.service.impl;
 
 import com.kientran.product_service.dto.ProductDto;
+import com.kientran.product_service.dto.TotalProductDto;
 import com.kientran.product_service.entity.Category;
 import com.kientran.product_service.entity.Discount;
 import com.kientran.product_service.entity.Product;
@@ -13,12 +14,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
-
 
     @Autowired
     private ProductRepository productRepo;
@@ -99,11 +100,45 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public ProductDto removeDiscount(Integer productId) {
+        Product product = this.productRepo.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "ProductId", productId));
+        Discount discount = product.getDiscount();
+        double currentPrice = product.getPrice();
+        double originalPrice = currentPrice / (1 - discount.getPercent());
+        product.setPrice(originalPrice);
+        product.setDiscount(null);
+        Product updateProduct = this.productRepo.save(product);
+        return this.modelMapper.map(updateProduct, ProductDto.class);
+    }
+
+    @Override
     public List<ProductDto> getProductsByCategory(Integer categoryId) {
         Category category = this.categoryRepo.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category ", "categoryId", categoryId));
         List<Product> products = this.productRepo.findByCategory(category);
         List<ProductDto> productDtos = products.stream().map((product) -> this.modelMapper.map(product, ProductDto.class))
+                .collect(Collectors.toList());
+        return productDtos;
+    }
+
+    @Override
+    public TotalProductDto getTotalProductInStore() {
+        TotalProductDto productDto = new TotalProductDto();
+        productDto.setTotal(this.productRepo.getTotalProduct());
+        return productDto;
+    }
+
+    @Override
+    public List<ProductDto> getProductsHaveDiscount() {
+        List<Product> products = this.productRepo.findAll();
+        List<Product> productsDiscount = new ArrayList<>();
+        for(Product product : products) {
+            if(product.getDiscount() != null) {
+                productsDiscount.add(product);
+            }
+        }
+        List<ProductDto> productDtos = productsDiscount.stream().map((product) -> this.modelMapper.map(product, ProductDto.class))
                 .collect(Collectors.toList());
         return productDtos;
     }
